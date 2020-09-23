@@ -43,23 +43,24 @@ class EchoBot(ClientXMPP):
         #     self.disconnect()
 
     def presence_subscribe(self, presence):
-        print("[" + presence['from'].user + "] te ha agregado a sus contactos")
+        print("[" + presence['from'].user + "] te ha agregado a sus contactos\n")
 
     def receive_message(self, msg):
         if msg['type'] in ('chat', 'normal'):
-            print("[" + msg['from'].user + "]: " + msg['body'])
+            print("[" + msg['from'].user + "]: " + msg['body'] + "\n")
     
     def menu(self):
         print("\n******************** OPCIONES DEL CHAT ********************\n")
-        print(" 1. MOSTRAR TODOS LOS USUARIOS/CONTACTOS Y SU ESTADO")
-        print(" 2. AGREGAR UN USUARIO A LOS CONTACTOS")
-        print(" 3. MOSTRAR DETALLES DE CONTACTO DE UN USUARIO")
-        print(" 4. COMUNICACION 1 A 1 CON CUALQUIER USUARIO/CONTACTO")
-        print(" 5. PARTICIPAR EN CONVERSACIONES GRUPALES")
-        print(" 6. DEFINIR MENSAJE DE PRESENCIA")
-        print(" 7. ENVIAR/RECIBIR NOTIFICACIONES")
-        print(" 8. ENVIAR/RECIBIR ARCHIVOS")
-        print(" 9. SALIR\n")
+        print(" 1 MOSTRAR TODOS LOS USUARIOS/CONTACTOS Y SU ESTADO")
+        print(" 2 AGREGAR UN USUARIO A LOS CONTACTOS")
+        print(" 3 MOSTRAR DETALLES DE CONTACTO DE UN USUARIO")
+        print(" 4 COMUNICACION 1 A 1 CON CUALQUIER USUARIO/CONTACTO")
+        print(" 5 PARTICIPAR EN CONVERSACIONES GRUPALES")
+        print(" 6 DEFINIR MENSAJE DE PRESENCIA")
+        print(" 7 ENVIAR/RECIBIR NOTIFICACIONES")
+        print(" 8 ENVIAR/RECIBIR ARCHIVOS")
+        print(" 9 SALIR")
+        print(" M VOLVER A SOLICITAR EL MENU\n")
         print("**********************************************************\n")
 
 
@@ -77,33 +78,54 @@ if __name__ == '__main__':
     xmpp.connect()
     xmpp.process(block=False)
 
+    xmpp.menu()
+
     while True:
 
-        xmpp.menu()
-        option = input("Ingresa la opcion: ")
+        option = input()
 
         # Agregar un usuario a los contactos
         if (option == "2"):
-            user_to_add = input("Usuario: ")
+            user_to_add = input("\nUsuario: ")
             xmpp.send_presence_subscription(pto=user_to_add + '@redes2020.xyz')
-            print("Agregado")
+            print("** Agregado **")
+
+        # Mostrar detalles de contacto de un usuario
+        elif (option == "3"):
+            usr = input("\nUsuario: ")
+            connections = xmpp.client_roster.presence(usr + '@redes2020.xyz')
+            for res, pres in connections.items():
+                show = 'available'
+                if pres['show']:
+                    show = pres['show']
+                print('   - %s (%s)' % (res, show))
+                if pres['status']:
+                    print('       %s' % pres['status'] + "\n")
 
         # Comunicacion 1 a 1 con cualquier usuario/contacto
-        if (option == "4"):
-            to_user = input("Usuario: ")
+        elif (option == "4"):
+            to_user = input("\nUsuario: ")
             mssg = input("Mensaje: ")
             xmpp.send_message(mto=to_user + '@redes2020.xyz', mbody=mssg, mtype='chat')
-            print("Mensaje enviado")
+            print("\n** Mensaje enviado **\n")
 
         # Definir mensaje de presencia
-        if (option == "6"):
-            shw = input("Estado (chat, away, xa, dnd): ")
+        elif (option == "6"):
+            shw = input("\nEstado (chat, away, xa, dnd): ")
             stts = input("Mensaje: ")
             xmpp.send_presence(pshow=shw, pstatus=stts)
-            print("Presencia cambiada")
+            print("\n** Presencia cambiada ** \n")
+        
+        # Volver a solicitar el menu
+        elif (option == "M"):
+            xmpp.menu()
 
+        # Log out
         elif (option == "9"):
-            print("\nDesconectando...")
+            print("\n** Desconectando... **")
             break
+
+        else:
+            "\n** ESA OPCION NO EXISTE ** \n"
     
     xmpp.disconnect()
