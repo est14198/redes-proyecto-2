@@ -12,6 +12,17 @@ class EchoBot(ClientXMPP):
         self.add_event_handler("session_start", self.session_start)
         self.add_event_handler("message", self.receive_message)
         self.add_event_handler("presence_subscribe", self.presence_subscribe)
+        self.add_event_handler('presence_available', self.handle_available_new)
+        self.add_event_handler('presence_dnd', self.handle_available)
+        self.add_event_handler('presence_xa', self.handle_available)
+        self.add_event_handler('presence_chat', self.handle_available)
+        self.add_event_handler('presence_away', self.handle_available)
+        self.add_event_handler('presence_unavailable', self.handle_unavailable)
+
+        self.register_plugin('xep_0030') # Service Discovery
+        self.register_plugin('xep_0047', {
+            'auto_accept': True
+        }) # In-band Bytestreams
 
         # If you wanted more functionality, here's how to register plugins:
         # self.register_plugin('xep_0030') # Service Discovery
@@ -43,12 +54,22 @@ class EchoBot(ClientXMPP):
         #     self.disconnect()
 
     def presence_subscribe(self, presence):
-        print("[" + presence['from'].user + "] te ha agregado a sus contactos\n")
+        print("\n** NOTIFICACION > [" + presence['from'].user + "] te ha agregado a sus contactos **\n")
 
     def receive_message(self, msg):
         if msg['type'] in ('chat', 'normal'):
-            print("[" + msg['from'].user + "]: " + msg['body'] + "\n")
+            print("\n[" + msg['from'].user + "]: " + msg['body'] + "\n")
+
+    def handle_available_new(self, pres):
+        print("\n** NOTIFICACION > [" + pres['from'].user + "] conectado **\n")
+
+    def handle_available(self, pres):
+        print("\n** NOTIFICACION > [" + pres['from'].user + "] cambio estado a -" + pres['status'] + " (" + pres['show'] + ") **\n")
+
+    def handle_unavailable(self, pres):
+        print("\n** NOTIFICACION > [" + pres['from'].user + "] se ha desconectado ** \n")
     
+
     def menu(self):
         print("\n******************** OPCIONES DEL CHAT ********************\n")
         print(" 1 MOSTRAR TODOS LOS USUARIOS/CONTACTOS Y SU ESTADO")
@@ -57,9 +78,8 @@ class EchoBot(ClientXMPP):
         print(" 4 COMUNICACION 1 A 1 CON CUALQUIER USUARIO/CONTACTO")
         print(" 5 PARTICIPAR EN CONVERSACIONES GRUPALES")
         print(" 6 DEFINIR MENSAJE DE PRESENCIA")
-        print(" 7 ENVIAR/RECIBIR NOTIFICACIONES")
-        print(" 8 ENVIAR/RECIBIR ARCHIVOS")
-        print(" 9 SALIR")
+        print(" 7 ENVIAR/RECIBIR ARCHIVOS")
+        print(" 8 SALIR")
         print(" M VOLVER A SOLICITAR EL MENU\n")
         print("**********************************************************\n")
 
@@ -121,7 +141,7 @@ if __name__ == '__main__':
             xmpp.menu()
 
         # Log out
-        elif (option == "9"):
+        elif (option == "8"):
             print("\n** Desconectando... **")
             break
 
