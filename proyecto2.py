@@ -19,10 +19,6 @@ class EchoBot(ClientXMPP):
         self.add_event_handler('presence_away', self.handle_available)
         self.add_event_handler('presence_unavailable', self.handle_unavailable)
 
-        self.register_plugin('xep_0030') # Service Discovery
-        self.register_plugin('xep_0047', {
-            'auto_accept': True
-        }) # In-band Bytestreams
 
         # If you wanted more functionality, here's how to register plugins:
         # self.register_plugin('xep_0030') # Service Discovery
@@ -31,48 +27,36 @@ class EchoBot(ClientXMPP):
         # Here's how to access plugins once you've registered them:
         # self['xep_0030'].add_feature('echo_demo')
 
-        # If you are working with an OpenFire server, you will
-        # need to use a different SSL version:
-        # import ssl
-        # self.ssl_version = ssl.PROTOCOL_SSLv3
 
     def session_start(self, event):
         self.send_presence()
         self.get_roster()
 
-        # Most get_*/set_* methods from plugins use Iq stanzas, which
-        # can generate IqError and IqTimeout exceptions
-        #
-        # try:
-        #     self.get_roster()
-        # except IqError as err:
-        #     logging.error('There was an error getting the roster')
-        #     logging.error(err.iq['error']['condition'])
-        #     self.disconnect()
-        # except IqTimeout:
-        #     logging.error('Server is taking too long to respond')
-        #     self.disconnect()
 
     def presence_subscribe(self, presence):
         print("\n** NOTIFICACION > [" + presence['from'].user + "] te ha agregado a sus contactos **\n")
+
 
     def receive_message(self, msg):
         if msg['type'] in ('chat', 'normal'):
             print("\n[" + msg['from'].user + "]: " + msg['body'] + "\n")
 
+
     def handle_available_new(self, pres):
         print("\n** NOTIFICACION > [" + pres['from'].user + "] conectado **\n")
+
 
     def handle_available(self, pres):
         print("\n** NOTIFICACION > [" + pres['from'].user + "] cambio estado a -" + pres['status'] + " (" + pres['show'] + ") **\n")
 
+
     def handle_unavailable(self, pres):
         print("\n** NOTIFICACION > [" + pres['from'].user + "] se ha desconectado ** \n")
     
-
+    
     def menu(self):
-        print("\n******************** OPCIONES DEL CHAT ********************\n")
-        print(" 1 MOSTRAR TODOS LOS USUARIOS/CONTACTOS Y SU ESTADO")
+        print("\n******************** OPCIONES ********************\n")
+        print(" 1 MOSTRAR TODOS LOS CONTACTOS Y SU ESTADO")
         print(" 2 AGREGAR UN USUARIO A LOS CONTACTOS")
         print(" 3 MOSTRAR DETALLES DE CONTACTO DE UN USUARIO")
         print(" 4 COMUNICACION 1 A 1 CON CUALQUIER USUARIO/CONTACTO")
@@ -85,15 +69,11 @@ class EchoBot(ClientXMPP):
 
 
 if __name__ == '__main__':
-    # Ideally use optparse or argparse to get JID,
-    # password, and log level.
-
-    #logging.basicConfig(level=logging.DEBUG,
-        #format='%(levelname)-8s %(message)s')
 
     user = input("Usuario: ")
     passwrd = input("Contrasena: ")
 
+    # Log in
     xmpp = EchoBot(user + '@redes2020.xyz', passwrd)
     xmpp.connect()
     xmpp.process(block=False)
@@ -104,8 +84,30 @@ if __name__ == '__main__':
 
         option = input()
 
+        # Mostrar todos los contactos y su estado
+        if (option == "1"):
+            groups = xmpp.client_roster.groups()
+            for group in groups:
+                print('\n%s' % group)
+                print('-' * 72)
+                for jid in groups[group]:
+                    sub = xmpp.client_roster[jid]['subscription']
+                    name = xmpp.client_roster[jid]['name']
+                    if xmpp.client_roster[jid]['name']:
+                        print(' %s (%s) ' % (name, jid))
+                    else:
+                        print(' %s ' % (jid))
+                    connections = xmpp.client_roster.presence(jid)
+                    for res, pres in connections.items():
+                        show = 'available'
+                        if pres['show']:
+                            show = pres['show']
+                        print('   - %s (%s)' % (res, show))
+                        if pres['status']:
+                            print('       %s' % pres['status'])
+
         # Agregar un usuario a los contactos
-        if (option == "2"):
+        elif (option == "2"):
             user_to_add = input("\nUsuario: ")
             xmpp.send_presence_subscription(pto=user_to_add + '@redes2020.xyz')
             print("** Agregado **")
@@ -146,6 +148,6 @@ if __name__ == '__main__':
             break
 
         else:
-            "\n** ESA OPCION NO EXISTE ** \n"
+            print("\n** ESA OPCION NO EXISTE ** \n")
     
     xmpp.disconnect()
