@@ -9,7 +9,16 @@ class EchoBot(ClientXMPP):
     def __init__(self, jid, password):
         ClientXMPP.__init__(self, jid, password)
 
+        self.register_plugin('xep_0030') # Service Discovery
+        self.register_plugin('xep_0004') # Data forms
+        self.register_plugin('xep_0066') # Out-of-band Data
+        self.register_plugin('xep_0077') # In-band Registration
+        self.register_plugin('xep_0047', {
+            'auto_accept': True
+        }) # In-band Bytestreams
+
         self.add_event_handler("session_start", self.session_start)
+        self.add_event_handler("register", self.register)
         self.add_event_handler("message", self.receive_message)
         self.add_event_handler("presence_subscribe", self.presence_subscribe)
         self.add_event_handler('presence_available', self.handle_available_new)
@@ -19,18 +28,27 @@ class EchoBot(ClientXMPP):
         self.add_event_handler('presence_away', self.handle_available)
         self.add_event_handler('presence_unavailable', self.handle_unavailable)
 
-
-        # If you wanted more functionality, here's how to register plugins:
-        # self.register_plugin('xep_0030') # Service Discovery
-        # self.register_plugin('xep_0199') # XMPP Ping
-
-        # Here's how to access plugins once you've registered them:
-        # self['xep_0030'].add_feature('echo_demo')
+        self.add_event_handler("ibb_stream_start", self.stream_opened, threaded=True)
+        self.add_event_handler("ibb_stream_data", self.stream_data)
 
 
     def session_start(self, event):
         self.send_presence()
         self.get_roster()
+
+
+    def register(self, iq):
+        resp = self.Iq()
+        resp['type'] = 'set'
+        resp['register']['username'] = self.boundjid.user
+        resp['register']['password'] = self.password
+        resp.send(now=True)
+        print("\n** NOTIFICACION > Cuenta nueva creada: [ %s ] **\n" % self.boundjid)
+
+
+    def unregister(self, username):
+        self.plugin['xep_0077'].cancel_registration(jid=username + '@redes2020.xyz', timeout=100)
+        print("\n** NOTIFICACION > Usuario eliminado **\n")
 
 
     def presence_subscribe(self, presence):
@@ -52,8 +70,18 @@ class EchoBot(ClientXMPP):
 
     def handle_unavailable(self, pres):
         print("\n** NOTIFICACION > [" + pres['from'].user + "] se ha desconectado ** \n")
+
+
+    def accept_stream(self, iq):
+        return True
+
+    def stream_opened(self, stream):
+        print('Archivo abierto: %s de %s' % (stream.sid, stream.peer_jid))
+
+    def stream_data(self, event):
+        print(event['data'] + "\n")
     
-    
+
     def menu(self):
         print("\n******************** OPCIONES ********************\n")
         print(" 1 MOSTRAR TODOS LOS CONTACTOS Y SU ESTADO")
@@ -62,9 +90,10 @@ class EchoBot(ClientXMPP):
         print(" 4 COMUNICACION 1 A 1 CON CUALQUIER USUARIO/CONTACTO")
         print(" 5 PARTICIPAR EN CONVERSACIONES GRUPALES")
         print(" 6 DEFINIR MENSAJE DE PRESENCIA")
-        print(" 7 ENVIAR/RECIBIR ARCHIVOS")
+        print(" 7 ENVIAR ARCHIVOS")
         print(" 8 SALIR")
-        print(" M VOLVER A SOLICITAR EL MENU\n")
+        print(" M VOLVER A SOLICITAR EL MENU")
+        print(" D ELIMINAR CUENTA\n")
         print("**********************************************************\n")
 
 
@@ -74,6 +103,7 @@ if __name__ == '__main__':
     passwrd = input("Contrasena: ")
 
     # Log in
+    # Si el user no existe, lo registra con los datos ingresados
     xmpp = EchoBot(user + '@redes2020.xyz', passwrd)
     xmpp.connect()
     xmpp.process(block=False)
@@ -141,6 +171,12 @@ if __name__ == '__main__':
         # Volver a solicitar el menu
         elif (option == "M"):
             xmpp.menu()
+
+        # Eliminar cuenta y desconectarse
+        elif (option == "D"):
+            xmpp.unregister(user)
+            print("** Desconectando... **")
+            break
 
         # Log out
         elif (option == "8"):
