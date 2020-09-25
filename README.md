@@ -47,6 +47,7 @@ Also, you will be notified when one of the following activities occur:
 A list of your contacts (with their info) will be sent to you.
 
 >**Example of output:**
+>
 >`msg = [1,4,1,'C','h','a','d']`
 
 ### Option 2
@@ -56,7 +57,9 @@ A list of your contacts (with their info) will be sent to you.
 To add a new contact, you must enter their username as shown below. The user will be notified that yu added them.
 
 >**Example of input:**
+>
 >`Usuario: san13660`
+>
 >`** Agregado **`
 
 ### Option 3
