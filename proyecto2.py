@@ -29,6 +29,8 @@ class EchoBot(ClientXMPP):
             'auto_accept': True
         }) # In-band Bytestreams
         self.register_plugin('xep_0045') # Multi-User Chat
+        self.register_plugin('xep_0060') # PubSub
+        self.register_plugin('xep_0199') # XMPP Ping
 
         # Handler de eventos
         self.add_event_handler("session_start", self.session_start)
@@ -121,18 +123,23 @@ class EchoBot(ClientXMPP):
         self.send_message(mto=group, mbody=msg, mtype='groupchat')
 
 
+    # Aceptar archivos de txt
     def accept_stream(self, iq):
         return True
 
 
+    # Mostrar quien envio el archivo
     def stream_opened(self, stream):
-        print('Archivo abierto: %s de %s' % (stream.sid, stream.peer_jid))
+        print('\n** NOTIFICACION > Archivo abierto: %s de %s' % (stream.sid, stream.peer_jid))
 
 
+    # Mostrar data de archivos
     def stream_data(self, event):
-        print(event['data'] + "\n")
+        f = open("my_new_file.txt", "wb")
+        f.write(event['data'])
+        f.close()
+        print("")
     
-
     # Menu de opciones
     def menu(self):
         print("\n******************** OPCIONES ********************\n")
@@ -144,7 +151,7 @@ class EchoBot(ClientXMPP):
         print(" 6 SALIR DE UN GRUPO")
         print(" 7 ENVIAR MENSAJE GRUPAL")
         print(" 8 DEFINIR MENSAJE DE PRESENCIA")
-        print(" 9 ENVIAR ARCHIVOS")
+        print(" 9 ENVIAR ARCHIVO")
         print(" 10 SALIR")
         print(" M VOLVER A SOLICITAR EL MENU")
         print(" D ELIMINAR CUENTA\n")
