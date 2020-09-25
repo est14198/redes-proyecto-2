@@ -9,6 +9,8 @@ class EchoBot(ClientXMPP):
     def __init__(self, jid, password):
         ClientXMPP.__init__(self, jid, password)
 
+        self.nick = "hola"
+
         self.register_plugin('xep_0030') # Service Discovery
         self.register_plugin('xep_0004') # Data forms
         self.register_plugin('xep_0066') # Out-of-band Data
@@ -16,6 +18,7 @@ class EchoBot(ClientXMPP):
         self.register_plugin('xep_0047', {
             'auto_accept': True
         }) # In-band Bytestreams
+        self.register_plugin('xep_0045') # Multi-User Chat
 
         self.add_event_handler("session_start", self.session_start)
         self.add_event_handler("register", self.register)
@@ -27,6 +30,8 @@ class EchoBot(ClientXMPP):
         self.add_event_handler('presence_chat', self.handle_available)
         self.add_event_handler('presence_away', self.handle_available)
         self.add_event_handler('presence_unavailable', self.handle_unavailable)
+
+        self.add_event_handler("groupchat_message", self.muc_message_receive)
 
         self.add_event_handler("ibb_stream_start", self.stream_opened, threaded=True)
         self.add_event_handler("ibb_stream_data", self.stream_data)
@@ -61,7 +66,7 @@ class EchoBot(ClientXMPP):
 
 
     def handle_available_new(self, pres):
-        print("\n** NOTIFICACION > [" + pres['from'].user + "] conectado **\n")
+        print("\n** NOTIFICACION > [" + pres['from'].user + "] disponible **\n")
 
 
     def handle_available(self, pres):
@@ -69,14 +74,33 @@ class EchoBot(ClientXMPP):
 
 
     def handle_unavailable(self, pres):
-        print("\n** NOTIFICACION > [" + pres['from'].user + "] se ha desconectado ** \n")
+        print("\n** NOTIFICACION > [" + pres['from'].user + "] no disponible ** \n")
+
+    
+    def join_group(self, room):
+        self.plugin['xep_0045'].joinMUC(room, self.nick)
+        self.plugin['xep_0045'].configureRoom(room)
+
+
+    def leave_group(self, room):
+        self.plugin['xep_0045'].leaveMUC(room, self.nick)
+
+
+    def muc_message_receive(self, msg):
+        print('[{}][{}] {} \n'.format(msg['from'].bare, msg['mucnick'], msg['body']))
+
+
+    def send_group_msg(self, group, msg):
+        self.send_message(mto=group, mbody=msg, mtype='groupchat')
 
 
     def accept_stream(self, iq):
         return True
 
+
     def stream_opened(self, stream):
         print('Archivo abierto: %s de %s' % (stream.sid, stream.peer_jid))
+
 
     def stream_data(self, event):
         print(event['data'] + "\n")
@@ -88,10 +112,12 @@ class EchoBot(ClientXMPP):
         print(" 2 AGREGAR UN USUARIO A LOS CONTACTOS")
         print(" 3 MOSTRAR DETALLES DE CONTACTO DE UN USUARIO")
         print(" 4 COMUNICACION 1 A 1 CON CUALQUIER USUARIO/CONTACTO")
-        print(" 5 PARTICIPAR EN CONVERSACIONES GRUPALES")
-        print(" 6 DEFINIR MENSAJE DE PRESENCIA")
-        print(" 7 ENVIAR ARCHIVOS")
-        print(" 8 SALIR")
+        print(" 5 UNIRSE A UN GRUPO")
+        print(" 6 SALIR DE UN GRUPO")
+        print(" 7 ENVIAR MENSAJE GRUPAL")
+        print(" 8 DEFINIR MENSAJE DE PRESENCIA")
+        print(" 9 ENVIAR ARCHIVOS")
+        print(" 10 SALIR")
         print(" M VOLVER A SOLICITAR EL MENU")
         print(" D ELIMINAR CUENTA\n")
         print("**********************************************************\n")
@@ -161,8 +187,27 @@ if __name__ == '__main__':
             xmpp.send_message(mto=to_user + '@redes2020.xyz', mbody=mssg, mtype='chat')
             print("\n** Mensaje enviado **\n")
 
-        # Definir mensaje de presencia
+        # Unirse a un grupo
+        elif (option == "5"):
+            rm_join = input("\nNombre de la sala: ")
+            xmpp.join_group(rm_join + '@conference.redes2020.xyz')
+            print("\n** Ingresaste al grupo **\n")
+        
+        # Salirse de un grupo
         elif (option == "6"):
+            rm_getout = input("\nNombre de la sala: ")
+            xmpp.leave_group(rm_getout + '@conference.redes2020.xyz')
+            print("\n** Saliste del grupo **\n")
+
+        # Enviar mensaje grupal
+        elif (option == "7"):
+            rm_msg = input("\nNombre de la sala: ")
+            msg_body = input("\nMensaje: ")
+            xmpp.send_message(mto=rm_msg + '@conference.redes2020.xyz', mbody=msg_body, mtype='groupchat')
+            print("\n** Mensaje enviado **\n")
+
+        # Definir mensaje de presencia
+        elif (option == "8"):
             shw = input("\nEstado (chat, away, xa, dnd): ")
             stts = input("Mensaje: ")
             xmpp.send_presence(pshow=shw, pstatus=stts)
@@ -175,12 +220,12 @@ if __name__ == '__main__':
         # Eliminar cuenta y desconectarse
         elif (option == "D"):
             xmpp.unregister(user)
-            print("** Desconectando... **")
+            print("** Cerrando sesion... **")
             break
 
         # Log out
-        elif (option == "8"):
-            print("\n** Desconectando... **")
+        elif (option == "10"):
+            print("\n** Cerrando sesion... **")
             break
 
         else:

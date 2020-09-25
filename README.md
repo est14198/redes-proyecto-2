@@ -48,7 +48,14 @@ A list of your contacts (with their info) will be sent to you.
 
 >**Example of output:**
 >
->`msg = [1,4,1,'C','h','a','d']`
+>`luisdelgadotry2@redes2020.xyz`
+>
+>`   - gajim.K16Q6O9M (available)`
+>
+>`est14198@redes2020.xyz`
+>
+>`   - 3ybv9tzdqx (available)`
+
 
 ### Option 2
 
@@ -72,7 +79,7 @@ To show the contact details of a specific user, you must enter their username as
 >
 >`Usuario: san13660`
 >
->`**Agregado**`
+>`   - gajim.XNCN4276 (available)`
 
 ### Option 4
 
