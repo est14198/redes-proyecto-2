@@ -1,16 +1,26 @@
-import logging
+# Universidad del Valle de Guatemala
+# Redes - Seccion 10
+# Maria Fernanda Estrada 14198
+# Proyecto 2 - Usando un protocolo existente
+# 24/09/2020
 
+
+# Librerias
+import logging
 from sleekxmpp import ClientXMPP
 from sleekxmpp.exceptions import IqError, IqTimeout
 
 
+# Inicializando EchoBot
 class EchoBot(ClientXMPP):
 
     def __init__(self, jid, password):
         ClientXMPP.__init__(self, jid, password)
 
-        self.nick = "hola"
+        # Nickname para grupos
+        self.nick = "mynickname"
 
+        # Plugins utilizados
         self.register_plugin('xep_0030') # Service Discovery
         self.register_plugin('xep_0004') # Data forms
         self.register_plugin('xep_0066') # Out-of-band Data
@@ -20,6 +30,7 @@ class EchoBot(ClientXMPP):
         }) # In-band Bytestreams
         self.register_plugin('xep_0045') # Multi-User Chat
 
+        # Handler de eventos
         self.add_event_handler("session_start", self.session_start)
         self.add_event_handler("register", self.register)
         self.add_event_handler("message", self.receive_message)
@@ -30,18 +41,19 @@ class EchoBot(ClientXMPP):
         self.add_event_handler('presence_chat', self.handle_available)
         self.add_event_handler('presence_away', self.handle_available)
         self.add_event_handler('presence_unavailable', self.handle_unavailable)
-
         self.add_event_handler("groupchat_message", self.muc_message_receive)
 
         self.add_event_handler("ibb_stream_start", self.stream_opened, threaded=True)
         self.add_event_handler("ibb_stream_data", self.stream_data)
 
 
+    # Iniciar sesion
     def session_start(self, event):
         self.send_presence()
         self.get_roster()
 
 
+    # Registrar un nuevo usuario si al ingresar no existe
     def register(self, iq):
         resp = self.Iq()
         resp['type'] = 'set'
@@ -51,45 +63,60 @@ class EchoBot(ClientXMPP):
         print("\n** NOTIFICACION > Cuenta nueva creada: [ %s ] **\n" % self.boundjid)
 
 
+    # Eliminar cuenta del server
     def unregister(self, username):
         self.plugin['xep_0077'].cancel_registration(jid=username + '@redes2020.xyz', timeout=100)
         print("\n** NOTIFICACION > Usuario eliminado **\n")
 
 
+    # Mostrar notificacion cuando alguien me agrega de contacto
     def presence_subscribe(self, presence):
         print("\n** NOTIFICACION > [" + presence['from'].user + "] te ha agregado a sus contactos **\n")
 
 
+    # Mostrar mensaje que me envian 1 a 1
     def receive_message(self, msg):
         if msg['type'] in ('chat', 'normal'):
             print("\n[" + msg['from'].user + "]: " + msg['body'] + "\n")
 
 
+    # Mostrar notificacion cuando alguien esta disponible
     def handle_available_new(self, pres):
         print("\n** NOTIFICACION > [" + pres['from'].user + "] disponible **\n")
 
 
+    # Mostrar notificacion cuando alguien cambia su presencia
     def handle_available(self, pres):
         print("\n** NOTIFICACION > [" + pres['from'].user + "] cambio estado a -" + pres['status'] + " (" + pres['show'] + ") **\n")
 
 
+    # Mostrar notificacion cuando alguien se desconecta
     def handle_unavailable(self, pres):
         print("\n** NOTIFICACION > [" + pres['from'].user + "] no disponible ** \n")
 
     
+    # Ingresar a un grupo. Si no existe, lo crea. Si ya existe, solo ingresa
     def join_group(self, room):
         self.plugin['xep_0045'].joinMUC(room, self.nick)
-        self.plugin['xep_0045'].configureRoom(room)
+        try:
+            self.plugin['xep_0045'].configureRoom(room)
+            print('')
+        except ValueError:
+            print('')
+        print("\n** Ingresaste al grupo **\n")
 
 
+    # Salir de grupo
     def leave_group(self, room):
         self.plugin['xep_0045'].leaveMUC(room, self.nick)
 
 
+    # Recibir mensajes de un grupo
     def muc_message_receive(self, msg):
         print('[{}][{}] {} \n'.format(msg['from'].bare, msg['mucnick'], msg['body']))
 
 
+    # Enviar mensaje a un grupo
     def send_group_msg(self, group, msg):
         self.send_message(mto=group, mbody=msg, mtype='groupchat')
 
@@ -106,6 +133,7 @@ class EchoBot(ClientXMPP):
         print(event['data'] + "\n")
     
 
+    # Menu de opciones
     def menu(self):
         print("\n******************** OPCIONES ********************\n")
         print(" 1 MOSTRAR TODOS LOS CONTACTOS Y SU ESTADO")
@@ -125,6 +153,7 @@ class EchoBot(ClientXMPP):
 
 if __name__ == '__main__':
 
+    # Ingresar usuario y contrasena
     user = input("Usuario: ")
     passwrd = input("Contrasena: ")
 
@@ -191,7 +220,6 @@ if __name__ == '__main__':
         elif (option == "5"):
             rm_join = input("\nNombre de la sala: ")
             xmpp.join_group(rm_join + '@conference.redes2020.xyz')
-            print("\n** Ingresaste al grupo **\n")
         
         # Salirse de un grupo
         elif (option == "6"):
