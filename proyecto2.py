@@ -130,7 +130,7 @@ class EchoBot(ClientXMPP):
 
     # Mostrar quien envio el archivo
     def stream_opened(self, stream):
-        print('\n** NOTIFICACION > Archivo abierto: %s de %s' % (stream.sid, stream.peer_jid))
+        print('\n** NOTIFICACION > Archivo abierto: %s' % (stream.sid))
 
 
     # Mostrar data de archivos
@@ -139,6 +139,17 @@ class EchoBot(ClientXMPP):
         f.write(event['data'])
         f.close()
         print("")
+
+    # Enviar un archivo
+    def send_file(self, receiver, file_name):
+        try:
+            stream = self['xep_0047'].open_stream(receiver)
+            with open(file_name) as f:
+                data = f.read()
+                stream.sendall(data)
+            print('\n** NOTIFICACION > Archivo enviado **')
+        except:
+            print('\n** NOTIFICACION > No se pudo enviar el archivo **')
     
     # Menu de opciones
     def menu(self):
@@ -247,6 +258,13 @@ if __name__ == '__main__':
             stts = input("Mensaje: ")
             xmpp.send_presence(pshow=shw, pstatus=stts)
             print("\n** Presencia cambiada ** \n")
+        
+        # Enviar archivo
+        elif (option == "9"):
+            recvr = input("\nUsuario: ")
+            resrc = input("Recurso: ")
+            filepath = input("Nombre del archivo: ")
+            xmpp.send_file(recvr + "@redes2020.xyz/" + resrc, filepath)
         
         # Volver a solicitar el menu
         elif (option == "M"):
