@@ -69,7 +69,9 @@ To add a new contact, you must enter their username as shown below. The user wil
 To show the contact details of a specific user, you must enter their username as shown below.
 
 >**Example of input/output:**
+>
 >`Usuario: san13660`
+>
 >`**Agregado**`
 
 ### Option 4
@@ -79,8 +81,11 @@ To show the contact details of a specific user, you must enter their username as
 To send a message (1 to 1 communication), you must enter their username and the message you want to send.
 
 >**Example of input:**
+>
 >`Usuario: san13660`
+>
 >`Mensaje: hola amigo`
+>
 >`** Mensaje enviado **`
 
 ### Option 5
@@ -90,7 +95,9 @@ To send a message (1 to 1 communication), you must enter their username and the 
 To join a group chat, enter the name of the room. If it doesn't exist, the program will automatically create a new one.
 
 >**Example of input:**
+>
 >`Nombre de la sala: grupochat`
+>
 >`** Ingresaste al grupo **`
 
 ### Option 6
@@ -100,7 +107,9 @@ To join a group chat, enter the name of the room. If it doesn't exist, the progr
 To leave a group chat, enter the name of the room.
 
 >**Example of input:**
+>
 >`Nombre de la sala: grupochat`
+>
 >`** Saliste del grupo **`
 
 ### Option 7
@@ -110,8 +119,11 @@ To leave a group chat, enter the name of the room.
 To send a message to a group chat, enter the name of the room and the message you want to send.
 
 >**Example of input:**
+>
 >`Nombre de la sala: grupochat`
+>
 >`Mensaje: hola companeros del grupo`
+>
 >`** Mensaje enviado **`
 
 ### Option 8
@@ -121,8 +133,11 @@ To send a message to a group chat, enter the name of the room and the message yo
 To change your presence (message and status), enter one of the 4 options for status (chat, away, xa, dnd) and the message you want to show.
 
 >**Example of input:**
+>
 >`Estado (chat, away, xa, dnd): dnd`
+>
 >`Mensaje: no me molesten ahorita`
+>
 >`** Presencia cambiada **`
 
 ### Option 10
@@ -132,6 +147,7 @@ To change your presence (message and status), enter one of the 4 options for sta
 If selected, you will log out.
 
 >**Example of output:**
+>
 >`** Cerrando sesion... **`
 
 ### Option M
@@ -141,11 +157,17 @@ If selected, you will log out.
 If selected, the menu will be displayed again.
 
 >**Example of output:**
+>
 >`******************** OPCIONES ********************`
+>
 >`1 MOSTRAR TODOS LOS CONTACTOS Y SU ESTADO`
+>
 >`2 AGREGAR UN USUARIO A LOS CONTACTOS`
+>
 >`3 MOSTRAR DETALLES DE CONTACTO DE UN USUARIO`
+>
 >`4 COMUNICACION 1 A 1 CON CUALQUIER USUARIO/CONTACTO`
+>
 >`...`
 
 ### Option D
@@ -155,7 +177,9 @@ If selected, the menu will be displayed again.
 If selected, your account will be removed from the server and you will be logged out.
 
 >**Example of output:**
+>
 >`** NOTIFICACION > Usuario eliminado **`
+>
 >`** Cerrando sesion... **`
 
 ## Documentation to use SleekXMPP (and XMPP extensions)
