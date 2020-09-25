@@ -26,7 +26,7 @@ To initiate the chat you must enter your username and password registered in the
 
 These options are detailed below.
 
-To use one of these functionalities, you must enter the number (or letter). In some cases you will be required either a username to send a message, a room name to create/join a group chat, or a message to send.
+To use one of these functionalities, you must enter ONLY the number (or letter). In some cases you will be required either a username to send a message, a room name to create/join a group chat, or a message to send.
 
 Also, you will be notified when one of the following activities occur:
 * When you create a new account
@@ -36,6 +36,7 @@ Also, you will be notified when one of the following activities occur:
 * When a contact logs in / logs out
 * When you enter a group chat
 * When a user/contact enters a group chat
+* Wehen someone sends you a txt file or when you send a txt file
 * When you delete your account from the server
 
 ## Functionality
@@ -146,6 +147,22 @@ To change your presence (message and status), enter one of the 4 options for sta
 >`Mensaje: no me molesten ahorita`
 >
 >`** Presencia cambiada **`
+
+### Option 9
+
+*Send files*
+
+To send a text file, enter the username, the resource and the file name.
+
+>**Example of input:**
+>
+>`Usuario: san13660`
+>
+>`Recurso: av38qhofl0`
+>
+>`Nombre del archivo: pruebas.txt`
+>
+>`** NOTIFICACION > Archivo enviado **`
 
 ### Option 10
 
